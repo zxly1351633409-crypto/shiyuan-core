@@ -1,0 +1,14 @@
+FROM python:3.13-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    OMP_NUM_THREADS=4 \
+    MALLOC_ARENA_MAX=2
+
+WORKDIR /service
+COPY requirements-semantic.txt /service/requirements-semantic.txt
+RUN pip install --no-cache-dir -r /service/requirements-semantic.txt
+COPY semantic_service /service/semantic_service
+
+EXPOSE 8720
+CMD ["python", "-m", "semantic_service.service", "serve"]

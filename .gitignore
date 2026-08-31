@@ -1,0 +1,15 @@
+.env
+core.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+runtime-data/
+backups/
+offline-outbox/
+*.sqlite3
+*.sqlite3-*
+*.npz
+*.onnx
+*.log
+dist/

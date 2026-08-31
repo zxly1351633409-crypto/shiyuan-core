@@ -1,0 +1,3 @@
+shiyuan-company-safe 0.1.8
+core compatibility: Ten Yuan Core 0.3.x
+network mode: offline by default

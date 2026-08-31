@@ -1,0 +1,8 @@
+{
+  "id": "shiyuan-hook",
+  "name": "Hana Hook · 十元",
+  "version": "0.3.4",
+  "description": "让 HanaAgent（含手机 PWA/Bridge 会话）读取十元 Core，恢复模糊指代与历史决策、追赶跨身体检查点，并在 Core 断线时本地排队后自动补传。",
+  "minAppVersion": "0.412.7",
+  "trust": "full-access"
+}

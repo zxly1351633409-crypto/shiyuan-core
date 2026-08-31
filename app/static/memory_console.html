@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>十元 · 记忆管理台</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4efe7;
+      --paper-deep: #e8dfd2;
+      --card: rgba(255, 253, 249, .88);
+      --ink: #2d2925;
+      --muted: #766e65;
+      --line: rgba(68, 58, 48, .13);
+      --accent: #d36e43;
+      --accent-soft: #f4d9ca;
+      --green: #47765d;
+      --yellow: #9a6c23;
+      --red: #9a4e48;
+      --shadow: 0 18px 55px rgba(74, 58, 43, .09);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255,255,255,.8), transparent 28rem),
+        linear-gradient(145deg, var(--paper), #eee6dc 58%, var(--paper-deep));
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+      line-height: 1.72;
+    }
+    button, input, select { font: inherit; }
+    .shell { width: min(1160px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 72px; }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+    .eyebrow { color: var(--accent); font-weight: 700; letter-spacing: .12em; font-size: 12px; }
+    h1 { margin: 5px 0 5px; font-size: clamp(30px, 5vw, 48px); line-height: 1.15; letter-spacing: -.04em; }
+    .subtitle { margin: 0; color: var(--muted); max-width: 700px; }
+    .readonly {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.45);
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+    .auth { padding: 18px; display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-bottom: 18px; }
+    .auth input, .toolbar input, .toolbar select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.72);
+      color: var(--ink);
+      padding: 10px 12px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: rgba(211,110,67,.55); box-shadow: 0 0 0 3px rgba(211,110,67,.1); }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      color: white;
+      background: var(--accent);
+      font-weight: 700;
+    }
+    button:hover { filter: brightness(.96); }
+    button:disabled { opacity: .55; cursor: wait; }
+    .hint { grid-column: 1 / -1; color: var(--muted); font-size: 12px; margin: -5px 2px 0; }
+    .status { display: none; margin: 0 0 18px; padding: 11px 14px; border-radius: 12px; font-size: 14px; }
+    .status.show { display: block; }
+    .status.error { color: var(--red); background: #f7e4e1; }
+    .status.ok { color: var(--green); background: #e3efe7; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0; }
+    .stat { padding: 17px 18px; }
+    .stat strong { display: block; font-size: 29px; line-height: 1.15; }
+    .stat span { color: var(--muted); font-size: 13px; }
+    .workspace { display: none; overflow: hidden; }
+    .workspace.ready { display: block; }
+    .tabs { display: flex; gap: 4px; padding: 8px 8px 0; border-bottom: 1px solid var(--line); }
+    .tab { color: var(--muted); background: transparent; border-radius: 10px 10px 0 0; padding: 10px 15px; }
+    .tab.active { color: var(--accent); background: var(--accent-soft); }
+    .toolbar { display: grid; grid-template-columns: 1fr 180px; gap: 10px; padding: 16px; border-bottom: 1px solid var(--line); }
+    .list { display: grid; gap: 10px; padding: 16px; }
+    .item { border: 1px solid var(--line); border-radius: 15px; padding: 15px 16px; background: rgba(255,255,255,.5); }
+    .item-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 8px; }
+    .content { font-size: 15px; font-weight: 650; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 9px; }
+    .badge { padding: 3px 8px; border-radius: 999px; font-size: 11px; color: var(--muted); background: #eee8df; }
+    .badge.active, .badge.confirmed { color: var(--green); background: #deece3; }
+    .badge.pending, .badge.candidate { color: var(--yellow); background: #f4ead5; }
+    .badge.superseded, .badge.rejected, .badge.inactive { color: var(--red); background: #f2e0de; }
+    .meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px 18px; margin-top: 11px; color: var(--muted); font-size: 12px; }
+    .meta span { overflow-wrap: anywhere; }
+    .empty { color: var(--muted); padding: 38px 16px; text-align: center; }
+    .footnote { color: var(--muted); font-size: 12px; margin-top: 14px; padding: 0 4px; }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 20px, 1160px); padding-top: 24px; }
+      .hero { display: block; }
+      .readonly { margin-top: 12px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .auth, .toolbar { grid-template-columns: 1fr; }
+      .meta { grid-template-columns: 1fr; }
+      .item-head { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <div class="eyebrow">SHIYUAN MEMORY</div>
+        <h1>十元记忆管理台</h1>
+        <p class="subtitle">看清楚十元记住了什么、为什么记住，以及它现在处于哪一种状态。</p>
+      </div>
+      <div class="readonly">只读模式 · 不会修改记忆</div>
+    </header>
+
+    <section class="panel auth" aria-label="连接 Core">
+      <input id="token" type="password" autocomplete="off" placeholder="输入十元 Core 令牌">
+      <button id="load">读取记忆</button>
+      <div class="hint">令牌只保存在当前页面会话中，不写入网址，也不会由管理台上传到其他服务。</div>
+    </section>
+    <div id="status" class="status" role="status"></div>
+
+    <section id="stats" class="stats" hidden>
+      <div class="panel stat"><strong id="activeCount">0</strong><span>正在执行的纠正规则</span></div>
+      <div class="panel stat"><strong id="confirmedCount">0</strong><span>已确认长期记忆</span></div>
+      <div class="panel stat"><strong id="candidateCount">0</strong><span>等待确认的候选</span></div>
+      <div class="panel stat"><strong id="historyCount">0</strong><span>已接入可见会话</span></div>
+    </section>
+
+    <section id="workspace" class="panel workspace">
+      <nav class="tabs" aria-label="记忆类型">
+        <button class="tab active" data-tab="corrections">操作纠正</button>
+        <button class="tab" data-tab="memories">长期记忆</button>
+      </nav>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="搜索规范化内容、范围或来源">
+        <select id="filter" aria-label="状态筛选"></select>
+      </div>
+      <div id="list" class="list"></div>
+    </section>
+    <p class="footnote">候选不是事实。操作纠正描述“十元应该怎样工作”，也不会被写成你的性格结论。</p>
+  </main>
+
+  <script>
+    const state = { data: null, tab: "corrections" };
+    const $ = (id) => document.getElementById(id);
+    const statusNames = {
+      active: "执行中", pending: "待积累", inactive: "已停用", superseded: "已被新版替代",
+      confirmed: "已确认", candidate: "待确认", rejected: "已拒绝"
+    };
+    const formatTime = (value) => value ? new Date(value).toLocaleString("zh-CN", { hour12: false }) : "未知";
+    const count = (group, key) => (group?.[key] || []).length;
+
+    function showStatus(message, type) {
+      const node = $("status");
+      node.textContent = message;
+      node.className = `status show ${type}`;
+    }
+
+    function addMeta(container, label, value) {
+      const node = document.createElement("span");
+      node.textContent = `${label}：${value ?? "未知"}`;
+      container.appendChild(node);
+    }
+
+    function card(item, status, kind) {
+      const root = document.createElement("article");
+      root.className = "item";
+      const head = document.createElement("div");
+      head.className = "item-head";
+      const main = document.createElement("div");
+      const content = document.createElement("div");
+      content.className = "content";
+      content.textContent = item.content || "（无内容）";
+      main.appendChild(content);
+      const badges = document.createElement("div");
+      badges.className = "badges";
+      const values = kind === "corrections"
+        ? [[status, statusNames[status] || status], [item.origin || "bounded", item.origin || "bounded"], [item.scope || "global", item.scope || "global"]]
+        : [[status, statusNames[status] || status], [item.kind || "memory", item.kind || "memory"], [item.scope || "personal", item.scope || "personal"]];
+      values.forEach(([className, label]) => {
+        const badge = document.createElement("span");
+        badge.className = `badge ${className}`;
+        badge.textContent = label;
+        badges.appendChild(badge);
+      });
+      main.appendChild(badges);
+      head.appendChild(main);
+      root.appendChild(head);
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      if (kind === "corrections") {
+        addMeta(meta, "激活依据", item.activation_reason);
+        addMeta(meta, "证据", `${item.evidence_count || 0} 次 / ${item.session_count || 0} 会话`);
+        addMeta(meta, "优先级", item.priority);
+        addMeta(meta, "版本", item.version || 1);
+        addMeta(meta, "最近身体", `${item.latest_body || "未知"}@${item.latest_device || "未知"}`);
+        addMeta(meta, "最近更新", formatTime(item.last_seen_at));
+      } else {
+        addMeta(meta, "来源", item.source);
+        addMeta(meta, "置信度", item.confidence);
+        addMeta(meta, "敏感级别", item.sensitivity);
+        addMeta(meta, "更新时间", formatTime(item.updated_at));
+        if (item.evidence) addMeta(meta, "证据/备注", item.evidence);
+      }
+      root.appendChild(meta);
+      return root;
+    }
+
+    function currentItems() {
+      if (!state.data) return [];
+      const group = state.data[state.tab] || {};
+      const selected = $("filter").value;
+      return Object.entries(group)
+        .flatMap(([status, items]) => (selected === "all" || selected === status)
+          ? items.map((item) => ({ item, status })) : []);
+    }
+
+    function render() {
+      const filter = $("filter");
+      const statuses = state.tab === "corrections"
+        ? ["all", "active", "pending", "superseded", "inactive"]
+        : ["all", "confirmed", "candidate", "rejected", "superseded"];
+      const previous = filter.value;
+      filter.replaceChildren(...statuses.map((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value === "all" ? "全部状态" : statusNames[value] || value;
+        return option;
+      }));
+      if (statuses.includes(previous)) filter.value = previous;
+      const query = $("search").value.trim().toLowerCase();
+      const items = currentItems().filter(({ item }) => JSON.stringify(item).toLowerCase().includes(query));
+      const list = $("list");
+      list.replaceChildren();
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "这里暂时没有符合条件的记录。";
+        list.appendChild(empty);
+        return;
+      }
+      items.forEach(({ item, status }) => list.appendChild(card(item, status, state.tab)));
+    }
+
+    async function loadData() {
+      const token = $("token").value.trim();
+      if (!token) return showStatus("需要先输入 Core 令牌。", "error");
+      $("load").disabled = true;
+      try {
+        const response = await fetch("/v1/memory/dashboard", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error(response.status === 403 ? "令牌不正确。" : `读取失败（${response.status}）。`);
+        state.data = await response.json();
+        sessionStorage.setItem("shiyuan-memory-token", token);
+        $("activeCount").textContent = count(state.data.corrections, "active");
+        $("confirmedCount").textContent = count(state.data.memories, "confirmed");
+        $("candidateCount").textContent = count(state.data.memories, "candidate");
+        $("historyCount").textContent = state.data.coverage?.history?.sessions || 0;
+        $("stats").hidden = false;
+        $("workspace").classList.add("ready");
+        showStatus(`已连接十元 Core ${state.data.version}。当前页面只读。`, "ok");
+        render();
+      } catch (error) {
+        showStatus(error.message || "无法读取记忆。", "error");
+      } finally {
+        $("load").disabled = false;
+      }
+    }
+
+    document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((item) => item.classList.toggle("active", item === tab));
+      state.tab = tab.dataset.tab;
+      $("search").value = "";
+      $("filter").value = "all";
+      render();
+    }));
+    $("load").addEventListener("click", loadData);
+    $("token").addEventListener("keydown", (event) => { if (event.key === "Enter") loadData(); });
+    $("search").addEventListener("input", render);
+    $("filter").addEventListener("change", render);
+    const cached = sessionStorage.getItem("shiyuan-memory-token");
+    if (cached) $("token").value = cached;
+  </script>
+</body>
+</html>

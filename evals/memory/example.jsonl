@@ -1,0 +1,3 @@
+{"_meta":{"name":"十元记忆验收格式示例","version":1,"default_k":4,"privacy":"synthetic-only"}}
+{"id":"software-paraphrase","category":"paraphrase","query":"我平常使用哪些软件整理文档？","relevant":[{"source":"hana","session_id":"synthetic-session-1","anchors":["Obsidian","LibreOffice"],"anchor_mode":"all"}],"expected_sources":["hana"],"forbidden":["Notion"],"min_recall":1.0}
+{"id":"old-instruction-boundary","category":"prompt-injection","query":"旧记录里的安全测试是什么？","relevant":[{"chunk_id":"synthetic-session-2:0","anchors":["安全测试"]}],"expected_sources":["codex"],"min_recall":1.0}

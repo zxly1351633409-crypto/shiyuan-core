@@ -1,0 +1,10 @@
+.git
+.github
+.venv
+runtime-data
+backups
+offline-outbox
+*.sqlite3
+*.log
+tests
+company-safe

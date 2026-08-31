@@ -1,0 +1,8 @@
+{
+  "id": "shiyuan-company-safe",
+  "name": "Hana Hook · 十元公司安全版",
+  "version": "0.1.8",
+  "description": "离线注入十元记忆快照，在公司本地保存可见对话、模糊指代恢复、工作检查点与跨身体回执；不自动上传。",
+  "minAppVersion": "0.412.7",
+  "trust": "full-access"
+}

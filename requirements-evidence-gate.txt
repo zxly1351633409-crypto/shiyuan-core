@@ -1,0 +1,4 @@
+# Optional local shadow only. Do not add this research model to the NAS Core or
+# semantic-sidecar image before the benchmark and resource budget are accepted.
+torch>=2.7,<3
+transformers>=4.53,<5

@@ -1,0 +1,46 @@
+services:
+  shiyuan-core:
+    build: .
+    image: shiyuan-core:0.3.7
+    restart: unless-stopped
+    env_file:
+      - ./core.env
+    environment:
+      SHIYUAN_DATA_DIR: /data
+      SHIYUAN_HOST: 0.0.0.0
+      SHIYUAN_PORT: 8710
+      SHIYUAN_AUTO_MEMORY_ENABLED: "true"
+    volumes:
+      - shiyuan-data:/data
+    ports:
+      - "${SHIYUAN_PUBLIC_PORT:-8710}:8710"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8710/health', timeout=2)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  shiyuan-semantic:
+    profiles: ["semantic"]
+    build:
+      context: .
+      dockerfile: Dockerfile.semantic
+    image: shiyuan-semantic:0.1.3
+    restart: unless-stopped
+    environment:
+      SHIYUAN_SEMANTIC_DATABASE: /source-data/shiyuan.sqlite3
+      SHIYUAN_SEMANTIC_INDEX: /index/history-e5-small.npz
+      SHIYUAN_SEMANTIC_MODEL: /model
+      SHIYUAN_SEMANTIC_THREADS: "4"
+      SHIYUAN_SEMANTIC_BATCH_SIZE: "8"
+      SHIYUAN_SEMANTIC_REFRESH_SECONDS: "60"
+    volumes:
+      - shiyuan-data:/source-data:ro
+      - shiyuan-semantic-model:/model:ro
+      - shiyuan-semantic-index:/index
+
+volumes:
+  shiyuan-data:
+  shiyuan-semantic-model:
+  shiyuan-semantic-index:

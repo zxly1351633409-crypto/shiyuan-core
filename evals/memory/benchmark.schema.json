@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiyuan.local/schemas/memory-benchmark-case-v1.json",
+  "title": "Shiyuan memory retrieval benchmark case v1",
+  "type": "object",
+  "required": ["id", "query"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "query": {"type": "string", "minLength": 1},
+    "category": {"type": "string"},
+    "k": {"type": "integer", "minimum": 1, "maximum": 30},
+    "min_recall": {"type": "number", "minimum": 0, "maximum": 1},
+    "expect_empty": {"type": "boolean"},
+    "expected_sources": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "forbidden": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "relevant": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "chunk_id": {"type": "string"},
+          "session_id": {"type": "string"},
+          "source": {"type": "string"},
+          "anchors": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "anchor_mode": {"enum": ["all", "any"]}
+        },
+        "anyOf": [
+          {"required": ["chunk_id"]},
+          {"required": ["session_id"]},
+          {"required": ["source"]},
+          {"required": ["anchors"]}
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}
