@@ -17,3 +17,18 @@ jobs:
       - run: python -m pytest -q
         env:
           SHIYUAN_CORE_TOKEN: ci-test-token-with-at-least-32-characters
+      - name: Build and smoke-test container
+        run: |
+          docker build -t shiyuan-core:test .
+          docker run -d --name shiyuan-core-ci \
+            -e SHIYUAN_CORE_TOKEN=ci-container-token-with-at-least-32-characters \
+            -p 8710:8710 shiyuan-core:test
+          trap 'docker logs shiyuan-core-ci; docker rm -f shiyuan-core-ci' EXIT
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8710/health | \
+              python -c "import json,sys; assert json.load(sys.stdin)['ok'] is True"; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
