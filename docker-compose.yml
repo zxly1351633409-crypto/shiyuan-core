@@ -1,7 +1,7 @@
 services:
   shiyuan-core:
     build: .
-    image: shiyuan-core:0.3.7
+    image: shiyuan-core:0.3.8
     restart: unless-stopped
     env_file:
       - ./core.env

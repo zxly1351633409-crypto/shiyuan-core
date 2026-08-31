@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 
-MARKERS = ("🐳 十元在线", "🐳 公司十元本地模式")
+MARKER_LINE = re.compile(r"(?m)^\s*🐳\s*[^\n]{1,64}(?:在线|公司安全模式|本地模式)\s*$")
 EVIDENCE_CUES = ("通过", "passed", "healthy", "测试", "验证", "sha-256", "commit", "提交", "校验")
 NEXT_CUES = ("下一步", "未完成", "尚未", "还需", "仍需", "待处理", "遗留", "需要重启")
 DECISION_CUES = ("决定", "采用", "选择", "保持", "不再", "改为", "范围")
@@ -23,8 +23,7 @@ def _matches(lines: list[str], cues: tuple[str, ...], limit: int = 5) -> list[st
 
 def compact_assistant_message(message: str) -> dict:
     text = str(message or "").replace("\r\n", "\n")
-    for marker in MARKERS:
-        text = text.replace(marker, "")
+    text = MARKER_LINE.sub("", text)
     text = text.strip()
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     paragraphs = [part.strip() for part in re.split(r"\n\s*\n", text) if part.strip()]

@@ -51,7 +51,7 @@ def test_open_v2_extracts_new_identity_boundary_without_predeclared_category():
     assert item.origin == "open-v2"
     assert item.scope == "global"
     assert item.explicit is True
-    assert "十元的身份是十元" in item.content
+    assert "助手的身份是十元" in item.content
     assert "小鲸鱼" in item.content
 
 

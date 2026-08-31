@@ -125,7 +125,7 @@ def main() -> None:
                     cached_at=cached.get("saved_at"),
                 )
                 if cached
-                else "[十元 Core 当前离线或不可达；继续正常工作，不要声称已读写长期记忆。]"
+                else "[个人助手 Core 当前离线或不可达；继续正常工作，不要声称已读写长期记忆。]"
             )
             output = {
                 "hookSpecificOutput": {

@@ -78,7 +78,7 @@ def seed_metrics(history: dict[str, Any], captured_at: str) -> dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Snapshot Ten Yuan hybrid-shadow health")
+    parser = argparse.ArgumentParser(description="Snapshot personal-assistant hybrid-shadow health")
     parser.add_argument("--config", type=Path, default=Path.home() / ".shiyuan" / "client.json")
     parser.add_argument("--minimum-samples", type=int, default=50)
     parser.add_argument("--maximum-p95-ms", type=float, default=250.0)

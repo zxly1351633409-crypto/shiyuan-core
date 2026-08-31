@@ -10,6 +10,7 @@ class Settings:
     data_dir: Path
     db_path: Path
     vault_dir: Path
+    assistant_name: str
     token: str
     host: str
     port: int
@@ -22,6 +23,9 @@ class Settings:
 
 def load_settings() -> Settings:
     data_dir = Path(os.environ.get("SHIYUAN_DATA_DIR", "runtime-data")).resolve()
+    assistant_name = os.environ.get("SHIYUAN_ASSISTANT_NAME", "我的助手").strip()
+    if not assistant_name or len(assistant_name) > 32 or any(char in assistant_name for char in "\r\n"):
+        raise RuntimeError("SHIYUAN_ASSISTANT_NAME must contain 1-32 characters on one line")
     token = os.environ.get("SHIYUAN_CORE_TOKEN", "")
     if len(token) < 32:
         raise RuntimeError("SHIYUAN_CORE_TOKEN must contain at least 32 characters")
@@ -35,6 +39,7 @@ def load_settings() -> Settings:
         data_dir=data_dir,
         db_path=data_dir / "shiyuan.sqlite3",
         vault_dir=data_dir / "vault",
+        assistant_name=assistant_name,
         token=token,
         host=os.environ.get("SHIYUAN_HOST", "127.0.0.1"),
         port=int(os.environ.get("SHIYUAN_PORT", "8710")),

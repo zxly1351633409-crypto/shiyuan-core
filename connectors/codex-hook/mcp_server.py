@@ -7,18 +7,18 @@ from mcp.server.fastmcp import FastMCP
 from shiyuan_client import body_context, request
 
 
-mcp = FastMCP("十元 Core")
+mcp = FastMCP("个人助手 Core")
 
 
 @mcp.tool()
 def shiyuan_status() -> str:
-    """查看十元 Core 状态。"""
+    """查看个人助手 Core 状态。"""
     return json.dumps(request("/v1/status"), ensure_ascii=False, indent=2)
 
 
 @mcp.tool()
 def shiyuan_recall(query: str, limit: int = 8) -> str:
-    """按主题检索十元已确认的跨身体长期记忆。"""
+    """按主题检索个人助手已确认的跨身体长期记忆。"""
     result = request(
         "/v1/recall",
         "POST",
@@ -29,7 +29,7 @@ def shiyuan_recall(query: str, limit: int = 8) -> str:
 
 @mcp.tool()
 def shiyuan_recall_history(query: str, limit: int = 6) -> str:
-    """按主题检索十元归档的旧可见对话，返回来源、会话、时间与原文片段。"""
+    """按主题检索个人助手归档的旧可见对话，返回来源、会话、时间与原文片段。"""
     result = request(
         "/v1/history/recall",
         "POST",
@@ -107,7 +107,7 @@ def shiyuan_propose_memory(
 
 @mcp.tool()
 def shiyuan_list_memory_proposals(limit: int = 30) -> str:
-    """列出等待用户审核的十元候选记忆。"""
+    """列出等待用户审核的个人助手候选记忆。"""
     result = request(f"/v1/memory/proposals?limit={max(1, min(limit, 100))}")
     return json.dumps(result["items"], ensure_ascii=False, indent=2)
 
@@ -153,7 +153,7 @@ def shiyuan_create_task(
 
 @mcp.tool()
 def shiyuan_get_tasks(status: str = "", assigned_body: str = "codex", limit: int = 30) -> str:
-    """读取十元任务卡；默认读取可交给 Codex 的任务。"""
+    """读取个人助手任务卡；默认读取可交给 Codex 的任务。"""
     query = f"?assigned_body={assigned_body}&limit={max(1, min(limit, 100))}"
     if status:
         query += f"&status={status}"
@@ -169,7 +169,7 @@ def shiyuan_report_task(
     artifacts: list[str] | None = None,
     evidence: list[str] | None = None,
 ) -> str:
-    """把 Codex 的任务进展、产物和证据回报给十元 Core。"""
+    """把 Codex 的任务进展、产物和证据回报给个人助手 Core。"""
     result = request(
         f"/v1/tasks/{task_id}/report",
         "POST",

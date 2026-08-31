@@ -47,7 +47,7 @@ from .models import (
     WorkCheckpointCreate,
     WorkTurnStart,
 )
-from .vault import CORE_IDENTITY, Vault
+from .vault import Vault
 from .work_state import classify_prompt, work_title
 
 
@@ -80,14 +80,22 @@ history_retriever = HybridHistoryRetriever(
 decision_graph = DecisionGraph(
     settings.data_dir / "evals" / "memory-semantic-v1" / "decision-graph" / "decision-graph.sqlite3"
 )
-vault = Vault(settings.vault_dir)
+vault = Vault(settings.vault_dir, settings.assistant_name)
 history_archive = HistoryArchive(settings.data_dir / "history")
 history_write_lock = threading.RLock()
 
 
 def seed() -> None:
+    previous_name = db.get_meta("assistant_name", "")
+    previous_marker = db.get_meta("response_marker", "")
+    inherited_default_markers = {"🐳 十元在线"}
+    if previous_name:
+        inherited_default_markers.add(f"🐳 {previous_name}在线")
+    if previous_marker in inherited_default_markers:
+        db.set_meta("response_marker", f"🐳 {settings.assistant_name}在线")
     db.seed_meta("response_style_mode", "canary")
-    db.seed_meta("response_marker", "🐳 十元在线")
+    db.seed_meta("response_marker", f"🐳 {settings.assistant_name}在线")
+    db.set_meta("assistant_name", settings.assistant_name)
     # Public installations start without anyone else's memories.
     db.enrich_operational_corrections(operational_correction_definitions())
     vault.sync_confirmed(db.list_memories("confirmed", 5000))
@@ -128,14 +136,15 @@ def understanding_brief(corrections: list[dict]) -> dict:
 
 def response_style() -> dict:
     mode = db.get_meta("response_style_mode", "canary")
-    marker = db.get_meta("response_marker", "🐳 十元在线") or "🐳 十元在线"
+    default_marker = f"🐳 {settings.assistant_name}在线"
+    marker = db.get_meta("response_marker", default_marker) or default_marker
     if mode == "off":
         return {"mode": "off", "marker": "", "instruction": "回复样式连接标记当前关闭。"}
     return {
         "mode": "canary",
         "marker": marker,
         "instruction": (
-            "这是十元 Core 的默认跨身体回复节奏。先给真实结果，再给必要证据和下一步。"
+            f"这是{settings.assistant_name} Core 的默认跨身体回复节奏。先给真实结果，再给必要证据和下一步。"
             "表达自然、具体、简洁；区分事实、推断和待确认项。不要模仿第三方角色，"
             "不要编造情绪、证据或完成状态，不输出模型私有推理。安全、隐私、费用和故障场景先说明风险。"
             "只有收到本 canary 指令时，"
@@ -154,7 +163,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="Ten Yuan Core", version=__version__, lifespan=lifespan)
+app = FastAPI(title="Shiyuan Personal Assistant Core", version=__version__, lifespan=lifespan)
 MEMORY_CONSOLE_PATH = Path(__file__).with_name("static") / "memory_console.html"
 
 
@@ -173,7 +182,8 @@ auth = [Depends(require_token)]
 def health() -> dict:
     return {
         "ok": True,
-        "name": "十元 Core",
+        "name": f"{settings.assistant_name} Core",
+        "assistant_name": settings.assistant_name,
         "version": __version__,
         "index": "sqlite-fts5" if db.fts_enabled else "sqlite-like",
         "auto_memory": "conservative-candidate" if settings.auto_memory_enabled else "off",
@@ -185,7 +195,8 @@ def health() -> dict:
 
 @app.get("/memory-console", response_class=HTMLResponse)
 def memory_console() -> HTMLResponse:
-    return HTMLResponse(MEMORY_CONSOLE_PATH.read_text(encoding="utf-8"))
+    page = MEMORY_CONSOLE_PATH.read_text(encoding="utf-8").replace("十元", settings.assistant_name)
+    return HTMLResponse(page)
 
 
 @app.post("/v1/bootstrap", dependencies=auth)
@@ -202,9 +213,9 @@ def bootstrap(request: BootstrapRequest) -> dict:
         project=request.project,
     )
     return {
-        "core": "十元",
+        "core": settings.assistant_name,
         "body": request.body,
-        "identity": CORE_IDENTITY,
+        "identity": vault.read_identity(),
         "user_profile": vault.read_user_profile(),
         "development_status": vault.read_development_status(),
         "operational_corrections": corrections,
@@ -235,7 +246,10 @@ def get_preferences() -> dict:
 @app.put("/v1/preferences", dependencies=auth)
 def update_preferences(preferences: ResponsePreferences) -> dict:
     db.set_meta("response_style_mode", preferences.response_style_mode)
-    db.set_meta("response_marker", preferences.response_marker.strip() or "🐳 十元在线")
+    db.set_meta(
+        "response_marker",
+        preferences.response_marker.strip() or f"🐳 {settings.assistant_name}在线",
+    )
     return response_style()
 
 
@@ -259,7 +273,7 @@ def memory_dashboard(limit: int = Query(default=200, ge=1, le=500)) -> dict:
     correction_states = ("active", "pending", "inactive", "superseded")
     memory_states = ("confirmed", "candidate", "rejected", "superseded")
     return {
-        "core": "十元",
+        "core": settings.assistant_name,
         "version": __version__,
         "readonly": True,
         "coverage": db.knowledge_coverage(),
@@ -555,7 +569,7 @@ def report_task(task_id: str, report: TaskReport) -> dict:
 @app.get("/v1/status", dependencies=auth)
 def status() -> dict:
     return {
-        "core": "十元",
+        "core": settings.assistant_name,
         "version": __version__,
         "data_dir": str(settings.data_dir),
         "vault_dir": str(settings.vault_dir),

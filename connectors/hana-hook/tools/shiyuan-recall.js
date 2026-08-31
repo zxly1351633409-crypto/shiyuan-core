@@ -1,7 +1,7 @@
 import { baseContext, coreRequest, loadConfig } from "../shared/client.js";
 
 export const name = "recall_shiyuan_memory";
-export const description = "按主题从十元 Core 检索已确认的跨身体长期记忆；可选择同时检索旧可见对话";
+export const description = "按主题从个人助手 Core 检索已确认的跨身体长期记忆；可选择同时检索旧可见对话";
 export const parameters = {
   type: "object",
   properties: {

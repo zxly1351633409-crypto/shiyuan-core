@@ -1,7 +1,7 @@
 import { coreRequest } from "../shared/client.js";
 
 export const name = "propose_shiyuan_memory";
-export const description = "向十元 Core 提交一条候选记忆；候选不会自动成为事实，需用户确认";
+export const description = "向个人助手 Core 提交一条候选记忆；候选不会自动成为事实，需用户确认";
 export const parameters = {
   type: "object",
   properties: {
@@ -33,5 +33,5 @@ export async function execute(input, toolCtx) {
     },
     toolCtx.dataDir,
   );
-  return `已提交十元候选记忆 ${result.id}，当前状态：${result.status}（尚未自动确认）`;
+  return `已提交个人助手候选记忆 ${result.id}，当前状态：${result.status}（尚未自动确认）`;
 }

@@ -1,7 +1,7 @@
 import { coreRequest } from "../shared/client.js";
 
 export const name = "review_shiyuan_memory";
-export const description = "列出十元候选记忆，或在用户明确要求后确认/拒绝指定候选；不得替用户自行确认";
+export const description = "列出个人助手候选记忆，或在用户明确要求后确认/拒绝指定候选；不得替用户自行确认";
 export const parameters = {
   type: "object",
   properties: {

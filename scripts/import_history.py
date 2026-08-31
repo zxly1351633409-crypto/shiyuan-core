@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Preview or import home-side visible AI conversations into Ten Yuan Core.
+"""Preview or import home-side visible AI conversations into a personal-assistant Core.
 
 Source files are opened read-only. The default mode is preview; network writes only
 occur when --apply is supplied. System/developer prompts, reasoning, tool calls,

@@ -4,7 +4,9 @@ import re
 from typing import Any
 
 
-MARKERS = ("🐳 十元在线", "🐳 公司十元本地模式")
+ONLINE_MARKER_RE = re.compile(
+    r"(?m)^[ \t]*🐳[^\r\n]{0,64}(?:在线|公司安全模式|本地模式)[ \t]*$"
+)
 INQUIRY_CUES = (
     "做了什么", "做到哪", "什么进展", "进展如何", "当前进度", "现在状态",
     "正在做什么", "在跑什么", "完成了吗", "任务状态",
@@ -44,9 +46,7 @@ def work_title(prompt: str, limit: int = 80) -> str:
 
 def _clean_message(message: str) -> str:
     text = str(message or "").replace("\r\n", "\n")
-    for marker in MARKERS:
-        text = text.replace(marker, "")
-    return text.strip()
+    return ONLINE_MARKER_RE.sub("", text).strip()
 
 
 def _lines_with_cues(lines: list[str], cues: tuple[str, ...], limit: int = 5) -> list[str]:

@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 def make_client(tmp_path):
     os.environ["SHIYUAN_DATA_DIR"] = str(tmp_path)
     os.environ["SHIYUAN_CORE_TOKEN"] = "test-token-that-is-definitely-long-enough"
+    os.environ["SHIYUAN_ASSISTANT_NAME"] = "海棠"
     import app.main
 
     importlib.reload(app.main)
@@ -31,7 +32,7 @@ def test_memory_task_and_event_flow(tmp_path):
             json={"body": "codex", "device": "test"},
         )
         assert bootstrap.status_code == 200
-        assert bootstrap.json()["core"] == "十元"
+        assert bootstrap.json()["core"] == "海棠"
         initial_coverage = bootstrap.json()["knowledge_coverage"]
         assert initial_coverage["memory"] == {}
         assert initial_coverage["operational_corrections"] == {}
@@ -39,7 +40,7 @@ def test_memory_task_and_event_flow(tmp_path):
         assert "private-reasoning-excluded" in initial_coverage["limits"]
         assert "候选记忆不是事实" in bootstrap.json()["identity"]
         assert "用户画像" in bootstrap.json()["user_profile"]
-        assert "当前版本：Core v0.3.7" in bootstrap.json()["development_status"]
+        assert "当前版本：Core v0.3.8" in bootstrap.json()["development_status"]
         assert client.get("/health").json()["work_continuity"] == "structured-receipts"
         assert client.get("/health").json()["history"] == "layered-visible-transcripts"
         assert client.get("/health").json()["history_retrieval"] == "keyword"
@@ -72,7 +73,14 @@ def test_memory_task_and_event_flow(tmp_path):
         ).json()
         assert "这是 Vault 中的实时版本" in refreshed["user_profile"]
         assert bootstrap.json()["response_style"]["mode"] == "canary"
-        assert bootstrap.json()["response_style"]["marker"] == "🐳 十元在线"
+        assert bootstrap.json()["response_style"]["marker"] == "🐳 海棠在线"
+
+        import app.main as main
+
+        main.db.set_meta("assistant_name", "旧名字")
+        main.db.set_meta("response_marker", "🐳 旧名字在线")
+        main.seed()
+        assert main.response_style()["marker"] == "🐳 海棠在线"
         style_instruction = bootstrap.json()["response_style"]["instruction"]
         assert "先给真实结果" in style_instruction
         assert "不要模仿第三方角色" in style_instruction
@@ -80,7 +88,7 @@ def test_memory_task_and_event_flow(tmp_path):
         assert len(style_instruction) < 1500
         confirmed_snapshot = tmp_path / "vault" / "10 Memory" / "Confirmed" / "已确认记忆.md"
         assert confirmed_snapshot.exists()
-        assert "十元已确认记忆" in confirmed_snapshot.read_text(encoding="utf-8")
+        assert "海棠已确认记忆" in confirmed_snapshot.read_text(encoding="utf-8")
 
         preferences = client.put(
             "/v1/preferences",
@@ -397,10 +405,10 @@ def test_work_receipt_compactor_is_bounded():
     assert classify_prompt("你来接手并继续") == "transfer"
     assert classify_prompt("请修复这个问题") == "work"
     assert classify_prompt("你好呀") == "chat"
-    raw = "已完成接口实现。\n\n验证：pytest 全部通过。\n\n下一步：需要重启 Hana。\n\n" + "原文" * 1000 + "\n\n🐳 十元在线"
+    raw = "已完成接口实现。\n\n验证：pytest 全部通过。\n\n下一步：需要重启 Hana。\n\n" + "原文" * 1000 + "\n\n🐳 海棠在线"
     compact = compact_assistant_message(raw)
     assert len(compact["result_summary"]) <= 900
-    assert "🐳 十元在线" not in compact["result_summary"]
+    assert "🐳 海棠在线" not in compact["result_summary"]
     assert compact["status"] == "waiting"
     assert any("pytest" in item for item in compact["evidence"])
     assert any("重启 Hana" in item for item in compact["next_actions"])
@@ -570,7 +578,7 @@ def test_open_correction_scope_and_readonly_memory_dashboard(tmp_path):
     with client:
         page = client.get("/memory-console")
         assert page.status_code == 200
-        assert "十元记忆管理台" in page.text
+        assert "海棠记忆管理台" in page.text
         assert "只读模式" in page.text
         assert "我喜欢先看验证证据" not in page.text
         assert client.get("/v1/memory/dashboard").status_code == 401

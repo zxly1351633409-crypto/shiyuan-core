@@ -9,6 +9,8 @@ from mcp.client.stdio import stdio_client
 
 
 async def main() -> None:
+    config = json.loads((Path.home() / ".shiyuan" / "client.json").read_text(encoding="utf-8"))
+    assistant_name = str(config.get("assistant_name") or "我的助手")
     params = StdioServerParameters(
         command=str(Path.home() / ".shiyuan" / "venv" / "Scripts" / "python.exe"),
         args=[str(Path.home() / ".shiyuan" / "codex-hook" / "mcp_server.py")],
@@ -37,9 +39,9 @@ async def main() -> None:
             result = await session.call_tool("shiyuan_status", {})
             text = result.content[0].text
             status = json.loads(text)
-            if status.get("core") != "十元":
+            if status.get("core") != assistant_name:
                 raise RuntimeError(f"Unexpected Core response: {status}")
-            print(f"Codex MCP OK: {len(names)} tools, Core {status['version']}")
+            print(f"Codex MCP OK: {len(names)} tools, {assistant_name} Core {status['version']}")
 
 
 if __name__ == "__main__":

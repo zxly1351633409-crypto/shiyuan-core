@@ -81,6 +81,7 @@ def test_context_cache_preserves_memory_but_disables_online_marker(tmp_path, mon
     )
     monkeypatch.setenv("SHIYUAN_CLIENT_CONFIG", str(config_path))
     bootstrap = {
+        "core": "海棠",
         "identity": "十元身份",
         "user_profile": "用户希望少重复解释。",
         "understanding_brief": {
@@ -115,4 +116,4 @@ def test_context_cache_preserves_memory_but_disables_online_marker(tmp_path, mon
     )
     assert "用户要感到被认出" in rendered
     assert "本机只读缓存" in rendered
-    assert "绝对不要附加十元在线标记" in rendered
+    assert "绝对不要附加在线标记" in rendered

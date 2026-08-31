@@ -257,7 +257,7 @@ def ensure_live_activity_bridge() -> bool:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Tail only user-visible Codex commentary into Ten Yuan work checkpoints.")
+    parser = argparse.ArgumentParser(description="Tail only user-visible Codex commentary into personal-assistant work checkpoints.")
     subparsers = parser.add_subparsers(dest="command", required=True)
     run = subparsers.add_parser("run")
     run.add_argument("--poll-seconds", type=float, default=1.5)

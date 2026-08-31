@@ -448,7 +448,7 @@ def compare_reports(current: dict[str, Any], baseline: dict[str, Any]) -> dict[s
 def render_markdown(report: dict[str, Any]) -> str:
     metrics = report["metrics"]
     lines = [
-        f"# {report.get('benchmark', {}).get('name', '十元记忆召回验收报告')}",
+        f"# {report.get('benchmark', {}).get('name', '个人助手记忆召回验收报告')}",
         "",
         "> 报告默认不保存召回正文，只保留查询、来源和可追溯 ID。",
         "",

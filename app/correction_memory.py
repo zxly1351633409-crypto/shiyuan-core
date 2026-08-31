@@ -26,7 +26,10 @@ _EXPLICIT = re.compile(
     r"(?:记住|以后|后续|每次|始终|一直|必须|严格|需要|不要再|别再|避免|默认|"
     r"我希望|我要求|警告|我感觉|总感觉|我的反馈)"
 )
-_INTERNAL_EVALUATION = re.compile(r"十元内部(?:测试|验收|[^。！!？?\n]{0,40}(?:测试|验收))")
+_INTERNAL_EVALUATION = re.compile(
+    r"(?:十元|助手|Core)内部(?:测试|验收|[^。！!？?\n]{0,40}(?:测试|验收))",
+    re.IGNORECASE,
+)
 _OPEN_PERSISTENT = re.compile(
     r"(?:以后|后续|每次|始终|一直|默认|长期|记住|不要再|别再|不许再|"
     r"我说过|已经说过|这个我说过|别把|不要混淆|不能混淆)"
@@ -60,8 +63,8 @@ _RULES: tuple[tuple[str, int, str, str, str, str, re.Pattern[str]], ...] = (
     (
         "felt_understanding",
         99,
-        "把已经记住的内容转化为当下可感知的理解：结合历史反馈、当前感受和真实任务状态作出有判断的回应；不能只复述画像、规则或声称十元有记忆。",
-        "用户在意的不是档案数量，而是换到任何已接入会话后，都能少解释一次，并感到十元认出了这次话背后的真正诉求。",
+        "把已经记住的内容转化为当下可感知的理解：结合历史反馈、当前感受和真实任务状态作出有判断的回应；不能只复述画像、规则或声称助手有记忆。",
+        "用户在意的不是档案数量，而是换到任何已接入会话后，都能少解释一次，并感到助手认出了这次话背后的真正诉求。",
         "回应能主动连上相关旧反馈，点明这次最影响体验的落差，并直接接走一个具体负担；让用户少解释一次，无需再教一遍同样的相处方式。",
         "罗列‘我记得你喜欢什么’、倾倒整份画像、空泛说‘我懂你’，或只增加 emoji，却没有让当前判断和行动发生变化。",
         re.compile(
@@ -133,7 +136,7 @@ _RULES: tuple[tuple[str, int, str, str, str, str, re.Pattern[str]], ...] = (
         "cross_body_continuity",
         85,
         "Codex 与 Hana 换身体时，应自动恢复最近目标、进展、结果、证据和下一步；不要要求用户复制转述后才能承接。",
-        "对用户而言 Codex 和 Hana 是十元的不同身体；换入口不该等于换了一个不认识当前工作的助手。",
+        "对用户而言 Codex 和 Hana 是同一助手的不同身体；换入口不该等于换了一个不认识当前工作的助手。",
         "另一身体开口前知道最近公开进展、已做决定、有效证据和下一步，并能说明是否存在并发冲突。",
         "只知道任务标题却不知道做到哪里，或让用户先总结 Codex/Hana 刚才干了什么才能继续。",
         re.compile(
@@ -252,8 +255,8 @@ def _open_conflict_key(content: str) -> str:
 def _canonicalize_open_sentence(sentence: str) -> str:
     canonical = _redact_open_content(sentence.strip(" -—_\t，,。.!！?？"))
     canonical = re.sub(r"^(?:我希望|我要求|我的要求是|请你|请)", "", canonical).strip()
-    canonical = canonical.replace("你的", "十元的").replace("你", "十元")
-    canonical = re.sub(r"^十元是十元[，,]\s*", "十元的身份是十元，", canonical)
+    canonical = canonical.replace("你的", "助手的").replace("你", "助手")
+    canonical = re.sub(r"^助手是(.+?)[，,]\s*", r"助手的身份是\1，", canonical)
     canonical = re.sub(r"(?:了)+$", "", canonical).strip("，,。 ")
     if len(canonical) > 260:
         canonical = canonical[:257].rstrip() + "…"
@@ -275,7 +278,7 @@ def _extract_open_corrections(
             continue
         identity_boundary = bool(
             re.search(
-                r"(?:你|十元).{0,24}(?:身份|称呼|自称|是).{0,24}(?:不是|不要|只能|必须|而是)",
+                r"(?:你|十元|助手).{0,24}(?:身份|称呼|自称|是).{0,24}(?:不是|不要|只能|必须|而是)",
                 sentence,
             )
         )

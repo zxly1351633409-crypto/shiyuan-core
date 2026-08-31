@@ -21,7 +21,7 @@ const context = compactBootstrap(
 );
 
 if (!context.includes(guard)) throw new Error("Hana context is missing the untrusted-history guard");
-if (!context.includes("十元知情范围与新鲜度")) throw new Error("Hana context is missing the coverage ledger");
+if (!context.includes("个人助手知情范围与新鲜度")) throw new Error("Hana context is missing the coverage ledger");
 if (!context.includes("决策：保持 hybrid-shadow，不启用正式 hybrid。")) {
   throw new Error("Hana context is missing structured handoff decisions");
 }

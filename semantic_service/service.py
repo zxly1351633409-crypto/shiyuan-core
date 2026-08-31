@@ -339,7 +339,7 @@ def create_app(index: SemanticIndex, model_name: str, refresh_seconds: int = 60)
             stop.set()
             thread.join(timeout=5)
 
-    app = FastAPI(title="Ten Yuan Semantic Shadow", version=__version__, lifespan=lifespan)
+    app = FastAPI(title="Personal Assistant Semantic Shadow", version=__version__, lifespan=lifespan)
 
     @app.get("/health")
     def health() -> dict[str, Any]:

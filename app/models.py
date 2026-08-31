@@ -101,7 +101,7 @@ class MemoryDecision(BaseModel):
 
 class ResponsePreferences(BaseModel):
     response_style_mode: Literal["off", "canary"] = "canary"
-    response_marker: str = Field(default="🐳 十元在线", max_length=64)
+    response_marker: str = Field(default="", max_length=64)
 
 
 class EventCreate(BaseModel):

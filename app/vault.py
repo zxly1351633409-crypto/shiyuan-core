@@ -6,9 +6,10 @@ from pathlib import Path
 from typing import Any
 
 
-CORE_IDENTITY = """# 十元 Core
+def core_identity(assistant_name: str) -> str:
+    return f"""# {assistant_name} Core
 
-十元 Core 是一个与模型和聊天前端解耦的个人 AI 状态层。Codex、HanaAgent
+{assistant_name} Core 是一个与模型和聊天前端解耦的个人 AI 状态层。Codex、HanaAgent
 或其他明确接入的 Agent 都可以作为“身体”；身份、已确认记忆和任务状态由
 Core 统一提供。
 
@@ -26,7 +27,7 @@ Core 统一提供。
 
 DEVELOPMENT_STATUS = """# 开发状态
 
-- 当前版本：Core v0.3.7（SQLite schema 8）
+- 当前版本：Core v0.3.8（SQLite schema 8）
 - 当前阶段：新实例，尚未写入个人开发状态
 - 建议流程：对齐目标 → 分阶段实施 → 保存验证证据 → 记录缺口与下一步
 """
@@ -50,8 +51,15 @@ USER_PROFILE = """# 用户画像
 
 
 class Vault:
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, assistant_name: str = "我的助手"):
         self.root = root
+        self.assistant_name = assistant_name
+        self.identity = core_identity(assistant_name)
+
+    @property
+    def identity_filename(self) -> str:
+        safe_name = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "_", self.assistant_name).strip(" ._")
+        return f"{safe_name or '助手'}.md"
 
     def initialize(self) -> None:
         (self.root / "00 Identity").mkdir(parents=True, exist_ok=True)
@@ -59,13 +67,21 @@ class Vault:
         (self.root / "10 Memory" / "Candidates").mkdir(parents=True, exist_ok=True)
         (self.root / "20 Tasks").mkdir(parents=True, exist_ok=True)
         (self.root / "90 System").mkdir(parents=True, exist_ok=True)
-        self._write_once(self.root / "00 Identity" / "十元.md", CORE_IDENTITY)
+        self._write_once(self.root / "00 Identity" / self.identity_filename, self.identity)
         self._write_once(self.root / "00 Identity" / "用户画像.md", USER_PROFILE)
         self._write_once(self.root / "90 System" / "开发状态.md", DEVELOPMENT_STATUS)
         self._write_once(
             self.root / "README.md",
-            "# 十元记忆库\n\n这里保存已确认记忆的人类可读同步记录。候选记忆不会自动成为事实。\n",
+            f"# {self.assistant_name}记忆库\n\n这里保存已确认记忆的人类可读同步记录。候选记忆不会自动成为事实。\n",
         )
+
+    def read_identity(self) -> str:
+        path = self.root / "00 Identity" / self.identity_filename
+        try:
+            content = path.read_text(encoding="utf-8").strip()
+        except FileNotFoundError:
+            content = ""
+        return content or self.identity.strip()
 
     def read_user_profile(self) -> str:
         """Read the live profile from the Vault, with the packaged template as fallback."""
@@ -114,7 +130,7 @@ class Vault:
     def sync_confirmed(self, memories: list[dict[str, Any]]) -> Path:
         target = self.root / "10 Memory" / "Confirmed" / "已确认记忆.md"
         lines = [
-            "# 十元已确认记忆",
+            f"# {self.assistant_name}已确认记忆",
             "",
             "> 由 Core 根据 SQLite 的 confirmed 状态同步生成；候选与工作假设不会出现在这里。",
             "",

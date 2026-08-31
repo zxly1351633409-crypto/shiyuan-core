@@ -14,6 +14,7 @@ def atomic_json(path: Path, value: dict) -> None:
 
 
 def main() -> None:
+    assistant_name = os.environ.get("SHIYUAN_INSTALL_ASSISTANT_NAME", "我的助手").strip()
     token = os.environ.get("SHIYUAN_INSTALL_TOKEN", "")
     if len(token) < 32:
         raise SystemExit(
@@ -31,6 +32,7 @@ def main() -> None:
             "token": token,
             "body": "codex",
             "device": hostname,
+            "assistant_name": assistant_name,
             "timeout_seconds": 2.0,
             "replay_timeout_seconds": 12.0,
             "capture_messages": True,
@@ -43,12 +45,13 @@ def main() -> None:
             "token": token,
             "body": "hana",
             "device": hostname,
+            "assistantName": assistant_name,
             "timeoutMs": 1800,
             "replayTimeoutMs": 12000,
             "captureMessages": True,
         },
     )
-    print(f"Ten Yuan client configs installed for {core_url} (token redacted).")
+    print(f"Personal assistant client configs installed for {core_url} (token redacted).")
 
 
 if __name__ == "__main__":

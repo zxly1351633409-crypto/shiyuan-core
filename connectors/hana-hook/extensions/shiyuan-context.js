@@ -133,7 +133,7 @@ export default function registerShiyuanContext(pi) {
         ));
       }
       return contextMessage(
-        `[十元 Core 当前离线或不可达；本轮继续正常工作，不要声称已读取或写入长期记忆。允许保存的可见事件已进入本机补传箱，当前 ${offlineOutboxStatus().pending} 条。]`,
+        `[个人助手 Core 当前离线或不可达；本轮继续正常工作，不要声称已读取或写入长期记忆。允许保存的可见事件已进入本机补传箱，当前 ${offlineOutboxStatus().pending} 条。]`,
       );
     }
     try {
@@ -174,7 +174,7 @@ export default function registerShiyuanContext(pi) {
         ));
       }
       return contextMessage(
-        "[十元 Core 当前离线或不可达；本轮继续正常工作，不要声称已读取或写入长期记忆。]",
+        "[个人助手 Core 当前离线或不可达；本轮继续正常工作，不要声称已读取或写入长期记忆。]",
       );
     }
   });

@@ -1,7 +1,7 @@
 import { coreRequest } from "../shared/client.js";
 
 export const name = "create_shiyuan_task";
-export const description = "建立十元跨身体任务交接卡，可指定 Codex/Hana 或暂不指定身体";
+export const description = "建立个人助手跨身体任务交接卡，可指定 Codex/Hana 或暂不指定身体";
 export const parameters = {
   type: "object",
   properties: {
@@ -31,5 +31,5 @@ export async function execute(input, toolCtx) {
     },
     toolCtx.dataDir,
   );
-  return `十元任务卡已建立：${result.id}\n${result.title}\n状态：${result.status}`;
+  return `个人助手任务卡已建立：${result.id}\n${result.title}\n状态：${result.status}`;
 }
